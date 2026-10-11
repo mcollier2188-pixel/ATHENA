@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidUserNote(data, userId) {
+      return data.keys().hasAll(['id', 'userId', 'name', 'kind']) &&
+             data.userId == userId &&
+             data.id is string &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
+             data.kind in ['note', 'folder', 'file'] &&
+             (!('text' in data) || data.text is string) &&
+             (!('tags' in data) || data.tags is string) &&
+             (!('parentId' in data) || data.parentId == null || data.parentId is string) &&
+             (!('isPinned' in data) || data.isPinned is bool);
+    }
+
+    function isValidAiCreation(data, userId) {
+      return data.keys().hasAll(['id', 'userId', 'type', 'prompt', 'modelUsed']) &&
+             data.userId == userId &&
+             data.id is string &&
+             data.type in ['image', 'video_text', 'video_image', 'music', 'transcript', 'chat'] &&
+             data.prompt is string && data.prompt.size() <= 2000 &&
+             data.modelUsed is string &&
+             (!('resultData' in data) || data.resultData is string);
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.userId == userId &&
+             (!('displayName' in data) || data.displayName is string) &&
+             (!('email' in data) || data.email is string) &&
+             (!('favoriteFrequency' in data) || data.favoriteFrequency is number);
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /notes/{noteId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidUserNote(request.resource.data, userId);
+        allow delete: if isOwner(userId);
+      }
+
+      match /generations/{generationId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidAiCreation(request.resource.data, userId);
+        allow delete: if isOwner(userId);
+      }
+
+      match /profile/{profileId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidUserProfile(request.resource.data, userId);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

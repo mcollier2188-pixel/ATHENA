@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "42 Geniuses Firestore Blueprint",
+  "entities": {
+    "UserNote": {
+      "path": "users/{userId}/notes/{noteId}",
+      "description": "User notes, folders, and field documents synced across devices",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 120 },
+        "text": { "type": "string", "maxLength": 100000 },
+        "tags": { "type": "string", "maxLength": 200 },
+        "kind": { "type": "string", "enum": ["note", "folder", "file"] },
+        "parentId": { "type": "string", "maxLength": 100 },
+        "isPinned": { "type": "boolean" },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["id", "userId", "name", "kind"]
+    },
+    "AiCreation": {
+      "path": "users/{userId}/generations/{generationId}",
+      "description": "AI multimodal artifacts (images, video, music, transcription, voice logs)",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["image", "video_text", "video_image", "music", "transcript", "chat"] },
+        "prompt": { "type": "string", "maxLength": 2000 },
+        "resultData": { "type": "string", "maxLength": 500000 },
+        "modelUsed": { "type": "string", "maxLength": 80 },
+        "createdAt": { "type": "timestamp" }
+      },
+      "required": ["id", "userId", "type", "prompt", "modelUsed"]
+    },
+    "UserProfile": {
+      "path": "users/{userId}/profile/{profileId}",
+      "description": "User profile with synchronized frequency and telemetry preferences",
+      "properties": {
+        "userId": { "type": "string" },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "email": { "type": "string", "maxLength": 100 },
+        "favoriteFrequency": { "type": "number" },
+        "updatedAt": { "type": "timestamp" }
+      },
+      "required": ["userId"]
+    }
+  }
+}

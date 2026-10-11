@@ -1,0 +1,6 @@
+{
+  "name": "ATHENA",
+  "description": "ATHENA intelligence & 42 Geniuses chronicle: 42.6 Hz bedrock resonance tuner, real-time waveform visualizer, and acoustic field workspace.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
